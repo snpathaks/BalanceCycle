@@ -1,0 +1,63 @@
+# ── Secrets ────────────────────────────────────────────────
+.env
+backend/.env
+
+# ── Python ──────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+*.egg
+.eggs/
+
+# ── Node / Frontend ─────────────────────────────────────────
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.vite/
+*.local
+
+# ── IDEs & OS ───────────────────────────────────────────────
+.vscode/
+.idea/
+*.DS_Store
+Thumbs.db
+
+# ── Misc ────────────────────────────────────────────────────
+*.log
+*.tmp
+*.bak
+# --- Python (backend) ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+venv/
+.venv/
+*.env
+.env
+!.env.example
+!.env.docker
+
+# --- Node (frontend) ---
+node_modules/
+dist/
+frontend/.env
+!frontend/.env.example
+
+# --- Alembic ---
+# Migration scripts ARE tracked — do not ignore alembic/versions/
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Editors ---
+.vscode/
+.idea/
+*.swp
