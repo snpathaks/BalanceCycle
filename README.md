@@ -196,9 +196,7 @@ BalanceCycle is intended for personal tracking and informational purposes only. 
 
 ---
 
-## 🤝 Contributing
 
-Issues and pull requests are welcome. Please open an issue to discuss significant changes before submitting a PR.
 
 ## 📄 License
 
