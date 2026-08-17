@@ -198,6 +198,4 @@ BalanceCycle is intended for personal tracking and informational purposes only. 
 
 
 
-## 📄 License
 
-No license file is currently included in this repository. Please contact the repository owner ([@snpathaks](https://github.com/snpathaks)) regarding usage and licensing terms.
