@@ -3,7 +3,14 @@
  * Base URL is inferred from the Vite proxy (/api → http://localhost:8000).
  */
 
-const BASE = '/api'
+const getApiBase = () => {
+  const envUrl = import.meta.env.VITE_API_URL
+  if (!envUrl) return '/api'
+  const trimmed = envUrl.replace(/\/+$/, '')
+  return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`
+}
+
+const BASE = getApiBase()
 
 export async function apiFetch(path, options = {}) {
   const url = `${BASE}${path}`

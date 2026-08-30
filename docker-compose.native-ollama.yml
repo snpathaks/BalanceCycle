@@ -1,0 +1,88 @@
+# ══════════════════════════════════════════════════════════════════════
+#  BalanceCycle — Docker Compose (Native Ollama variant)
+#
+#  Use this file when Ollama is running natively on the host
+#  (not as a Docker container). Ollama must be started separately:
+#    E:\Downloads\Ollama\ollama.exe serve
+#
+#  Services:
+#    db       — PostgreSQL 16
+#    backend  — FastAPI + uvicorn  (connects to host Ollama)
+#    frontend — Vite build served by nginx
+#
+#  Usage:
+#    docker compose -f docker-compose.native-ollama.yml up --build
+#    docker compose -f docker-compose.native-ollama.yml up -d
+#    docker compose -f docker-compose.native-ollama.yml down -v
+# ══════════════════════════════════════════════════════════════════════
+
+services:
+
+  # ── PostgreSQL ─────────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: balancecycle_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER:     ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB:       ${POSTGRES_DB:-balancecycle}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"        # expose for local DB tools (TablePlus, DBeaver, etc.)
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-balancecycle}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+
+  # ── FastAPI backend ────────────────────────────────────────────────
+  # Ollama runs natively on the host at localhost:11434
+  # Docker containers reach the host via host.docker.internal
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: balancecycle_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # Linux host bridge
+    environment:
+      DATABASE_URL:     postgresql+psycopg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-balancecycle}
+      OLLAMA_BASE_URL:  http://host.docker.internal:11434
+      OLLAMA_MODEL:     ${OLLAMA_MODEL:-llama3.1}
+      ENVIRONMENT:      ${ENVIRONMENT:-production}
+      ALLOWED_ORIGINS:  ${ALLOWED_ORIGINS:-http://localhost}
+    ports:
+      - "8000:8000"        # expose for direct API access / Swagger UI
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+
+  # ── React frontend (nginx) ─────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: balancecycle_frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "80:80"            # app accessible at http://localhost
+
+
+volumes:
+  pg_data:
+    name: balancecycle_pg_data

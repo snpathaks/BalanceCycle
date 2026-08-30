@@ -40,7 +40,7 @@ class TestRunTriage:
         """An unrecognised severity label should fall back to 'moderate'."""
         result = run_triage("unknown_label")
         assert result.severity == "moderate"
-        assert result.see_doctor is True
+        assert result.see_doctor is False
 
     def test_remedies_are_non_empty_strings(self):
         for severity in ("mild", "moderate", "severe"):

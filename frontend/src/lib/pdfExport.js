@@ -18,7 +18,7 @@ function addHeader(doc, title, subtitle) {
   doc.text('BalanceCycle — Health Summary', 14, 12)
   doc.setFontSize(9)
   doc.setFont('helvetica', 'normal')
-  doc.text(subtitle, 14, 12)
+  doc.text(subtitle, 196, 12, { align: 'right' })
   doc.setTextColor(...INK)
   return 28
 }

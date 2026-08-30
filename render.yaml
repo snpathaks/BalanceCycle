@@ -1,0 +1,91 @@
+# ══════════════════════════════════════════════════════════════════════
+#  BalanceCycle — Render Blueprint (Infrastructure as Code)
+#
+#  Services defined:
+#    1. balancecycle-db        — Managed PostgreSQL Database
+#    2. balancecycle-ollama    — Ollama LLM Container with Persistent Disk
+#    3. balancecycle-backend   — FastAPI Web Service (Python/Docker)
+#    4. balancecycle-frontend  — React Static Site with Global CDN
+#
+#  How to deploy on Render:
+#    1. Push this repository to GitHub / GitLab.
+#    2. In the Render Dashboard, click "New +" -> "Blueprint".
+#    3. Connect your repository — Render will automatically create
+#       and link all 4 services defined below.
+# ══════════════════════════════════════════════════════════════════════
+
+version: "1"
+
+databases:
+  # ── 1. PostgreSQL Database ──────────────────────────────────────────
+  - name: balancecycle-db
+    databaseName: balancecycle
+    user: balancecycle_user
+    plan: free                  # Change to 'starter' for production persistence
+    region: oregon
+
+services:
+  # ── 2. Ollama Local LLM Service ────────────────────────────────────
+  - type: web
+    name: balancecycle-ollama
+    runtime: docker
+    dockerfilePath: ./ollama/Dockerfile
+    dockerContext: ./ollama
+    region: oregon
+    plan: starter               # Standard CPU/RAM for Ollama (or 'standard' / 'pro' for faster inference)
+    disk:
+      name: ollama-models
+      mountPath: /root/.ollama
+      sizeGB: 10                # Stores downloaded model weights
+    healthCheckPath: /api/tags
+    envVars:
+      - key: OLLAMA_MODEL
+        value: llama3.2:1b      # Fast & lightweight for cloud CPU; or 'llama3.1' on >=8GB RAM plans
+      - key: PORT
+        value: 11434
+
+  # ── 3. FastAPI Backend ──────────────────────────────────────────────
+  - type: web
+    name: balancecycle-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    region: oregon
+    plan: free                  # Free or starter tier
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: balancecycle-db
+          property: connectionString
+      - key: OLLAMA_BASE_URL
+        fromService:
+          type: web
+          name: balancecycle-ollama
+          property: host
+      - key: OLLAMA_MODEL
+        value: llama3.2:1b
+      - key: ENVIRONMENT
+        value: production
+      - key: ALLOWED_ORIGINS
+        value: "*"              # Or specify your frontend Render URL
+      - key: PORT
+        value: 8000
+
+  # ── 4. React Frontend (Static Site with CDN) ────────────────────────
+  - type: static
+    name: balancecycle-frontend
+    region: oregon
+    plan: free                  # Static sites are 100% free on Render
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: balancecycle-backend
+          property: host

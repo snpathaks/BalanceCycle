@@ -28,7 +28,6 @@ export default function NavBar() {
                 to={to}
                 end={to === '/'}
                 className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
-                aria-current={({ isActive }) => isActive ? 'page' : undefined}
               >
                 {label}
               </NavLink>

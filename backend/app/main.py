@@ -18,9 +18,13 @@ from app.routers import symptoms, triage, cycles, trends, remedies
 from app.services import symptom_service, cycle_service, remedy_service
 from app.services.triage_engine import run_triage
 
-# ── Create DB tables on startup (dev only — use Alembic in production) ─────
-if settings.debug:
+# ── Create DB tables on startup ────────────────────────────────────────────
+try:
     Base.metadata.create_all(bind=engine)
+except Exception as e:
+    # Log warning if DB isn't reachable yet during build time
+    import logging
+    logging.getLogger(__name__).warning("Could not create DB tables on startup: %s", e)
 
 # ── Application factory ────────────────────────────────────────────────────
 app = FastAPI(
