@@ -29,8 +29,8 @@ services:
   - type: web
     name: balancecycle-ollama
     runtime: docker
-    dockerfilePath: ./ollama/Dockerfile
-    dockerContext: ./ollama
+    dockerfilePath: ollama/Dockerfile
+    dockerContext: ollama
     region: oregon
     plan: starter               # Standard CPU/RAM for Ollama (or 'standard' / 'pro' for faster inference)
     disk:
@@ -48,8 +48,8 @@ services:
   - type: web
     name: balancecycle-backend
     runtime: docker
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    dockerfilePath: backend/Dockerfile
+    dockerContext: backend
     region: oregon
     plan: free                  # Free or starter tier
     healthCheckPath: /health
