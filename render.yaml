@@ -75,11 +75,10 @@ services:
       - key: SECRET_KEY
         generateValue: true     # Render auto-generates a secure random string
 
+staticSites:
   # ── 4. React Frontend (Static Site with CDN) ────────────────────────
-  - type: static
-    name: balancecycle-frontend
+  - name: balancecycle-frontend
     region: oregon
-    plan: free                  # Static sites are 100% free on Render
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: frontend/dist
     routes:
