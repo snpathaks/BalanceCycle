@@ -53,6 +53,7 @@ services:
     region: oregon
     plan: free                  # Free or starter tier
     healthCheckPath: /health
+    preDeployCommand: "alembic upgrade head"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -71,6 +72,8 @@ services:
         value: "*"              # Or specify your frontend Render URL
       - key: PORT
         value: 8000
+      - key: SECRET_KEY
+        generateValue: true     # Render auto-generates a secure random string
 
   # ── 4. React Frontend (Static Site with CDN) ────────────────────────
   - type: static

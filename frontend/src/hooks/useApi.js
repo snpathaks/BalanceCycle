@@ -4,10 +4,12 @@
  */
 
 const getApiBase = () => {
-  const envUrl = import.meta.env.VITE_API_URL
+  let envUrl = import.meta.env.VITE_API_URL
   if (!envUrl) return '/api'
-  const trimmed = envUrl.replace(/\/+$/, '')
-  return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`
+  envUrl = envUrl.replace(/\/+$/, '')
+  // Render's fromService returns bare hostnames without protocol
+  if (envUrl && !envUrl.startsWith('http')) envUrl = `https://${envUrl}`
+  return envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`
 }
 
 const BASE = getApiBase()
