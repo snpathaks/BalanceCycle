@@ -2,6 +2,7 @@
 SQLAlchemy ORM table definitions for BalanceCycle.
 
 Tables:
+  - users                : registered accounts (email + bcrypt password)
   - symptom_logs         : one row per user submission (raw free-text)
   - extracted_symptoms   : structured symptoms extracted from a log by the LLM
   - cycle_logs           : period start/end dates for cycle tracking & prediction
@@ -30,6 +31,26 @@ from app.core.database import Base
 def _utcnow():
     """Timezone-aware UTC timestamp helper."""
     return datetime.now(timezone.utc)
+
+
+# ── User ───────────────────────────────────────────────────────────────────
+class User(Base):
+    """
+    Registered user account. Passwords are stored as bcrypt hashes —
+    the plaintext password is never persisted.
+    """
+
+    __tablename__ = "users"
+
+    id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
+    email = Column(String(256), unique=True, nullable=False, index=True)
+    username = Column(String(128), unique=True, nullable=False, index=True)
+    hashed_password = Column(String(256), nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_utcnow, nullable=False)
+
+    def __repr__(self):
+        return f"<User id={self.id} email={self.email!r}>"
 
 
 # ── SymptomLog ─────────────────────────────────────────────────────────────

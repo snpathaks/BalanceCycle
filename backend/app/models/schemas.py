@@ -10,7 +10,37 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator
+
+
+# ── Auth schemas ───────────────────────────────────────────────────────────
+
+class UserCreate(BaseModel):
+    """Body for POST /api/auth/register."""
+    email: EmailStr
+    username: str = Field(..., min_length=3, max_length=128, pattern=r'^[a-zA-Z0-9_-]+$')
+    password: str = Field(..., min_length=8, max_length=128)
+
+
+class UserOut(BaseModel):
+    """Public user info returned after register/login."""
+    id: int
+    email: str
+    username: str
+
+    model_config = {"from_attributes": True}
+
+
+class Token(BaseModel):
+    """JWT token response."""
+    access_token: str
+    token_type: str = "bearer"
+    user: UserOut
+
+
+class TokenData(BaseModel):
+    """Decoded JWT payload."""
+    sub: Optional[str] = None  # user id as string
 
 
 # ── Shared / base schemas ──────────────────────────────────────────────────

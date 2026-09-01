@@ -20,6 +20,11 @@ class Settings(BaseSettings):
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "llama3.1"
 
+    # --- JWT Auth ---
+    SECRET_KEY: str                                # 32-byte random hex, e.g. openssl rand -hex 32
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
+
     # --- App ---
     ENVIRONMENT: str = "development"
 
