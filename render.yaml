@@ -3,15 +3,18 @@
 #
 #  Services defined:
 #    1. balancecycle-db        — Managed PostgreSQL Database
-#    2. balancecycle-ollama    — Ollama LLM Container with Persistent Disk
-#    3. balancecycle-backend   — FastAPI Web Service (Python/Docker)
-#    4. balancecycle-frontend  — React Static Site with Global CDN
+#    2. balancecycle-backend   — FastAPI Web Service (Python/Docker)
+#    3. balancecycle-frontend  — React Static Site with Global CDN
+#
+#  NOTE: Ollama LLM service is excluded (not cost-free on Render).
+#        Use an external/local Ollama instance and set OLLAMA_BASE_URL
+#        as a manual environment variable in the Render Dashboard if needed.
 #
 #  How to deploy on Render:
 #    1. Push this repository to GitHub / GitLab.
 #    2. In the Render Dashboard, click "New +" -> "Blueprint".
 #    3. Connect your repository — Render will automatically create
-#       and link all 4 services defined below.
+#       and link all 3 services defined below.
 # ══════════════════════════════════════════════════════════════════════
 
 version: "1"
@@ -25,26 +28,7 @@ databases:
     region: oregon
 
 services:
-  # ── 2. Ollama Local LLM Service ────────────────────────────────────
-  - type: web
-    name: balancecycle-ollama
-    runtime: docker
-    dockerfilePath: ollama/Dockerfile
-    dockerContext: ollama
-    region: oregon
-    plan: starter               # Standard CPU/RAM for Ollama (or 'standard' / 'pro' for faster inference)
-    disk:
-      name: ollama-models
-      mountPath: /root/.ollama
-      sizeGB: 10                # Stores downloaded model weights
-    healthCheckPath: /api/tags
-    envVars:
-      - key: OLLAMA_MODEL
-        value: llama3.2:1b      # Fast & lightweight for cloud CPU; or 'llama3.1' on >=8GB RAM plans
-      - key: PORT
-        value: 11434
-
-  # ── 3. FastAPI Backend ──────────────────────────────────────────────
+  # ── 2. FastAPI Backend ──────────────────────────────────────────────
   - type: web
     name: balancecycle-backend
     runtime: docker
@@ -59,13 +43,10 @@ services:
         fromDatabase:
           name: balancecycle-db
           property: connectionString
-      - key: OLLAMA_BASE_URL
-        fromService:
-          type: web
-          name: balancecycle-ollama
-          property: host
-      - key: OLLAMA_MODEL
-        value: llama3.2:1b
+      # Set OLLAMA_BASE_URL manually in the Render Dashboard if using
+      # an external Ollama instance (e.g. self-hosted or local tunnel).
+      # - key: OLLAMA_BASE_URL
+      #   value: https://your-ollama-instance.example.com
       - key: ENVIRONMENT
         value: production
       - key: ALLOWED_ORIGINS
@@ -76,7 +57,7 @@ services:
         generateValue: true     # Render auto-generates a secure random string
 
 staticSites:
-  # ── 4. React Frontend (Static Site with CDN) ────────────────────────
+  # ── 3. React Frontend (Static Site with CDN) ────────────────────────
   - name: balancecycle-frontend
     region: oregon
     buildCommand: cd frontend && npm install && npm run build
