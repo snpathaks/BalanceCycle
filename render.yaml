@@ -58,6 +58,7 @@ services:
 
   # ── 3. React Frontend (Static Site with CDN) ────────────────────────
   - type: static
+    runtime: static
     name: balancecycle-frontend
     region: oregon
     buildCommand: cd frontend && npm install && npm run build
