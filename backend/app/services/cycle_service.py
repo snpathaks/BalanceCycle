@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from datetime import date, datetime, timedelta, timezone
 from statistics import mean
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 from sqlalchemy.orm import Session
 

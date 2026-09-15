@@ -34,7 +34,8 @@ _MILD_REMEDIES = [
 ]
 
 _MODERATE_REMEDIES = [
-    "Use a prescription-strength NSAID (e.g. mefenamic acid) if over-the-counter options are insufficient — consult a pharmacist first.",
+    "Use a prescription-strength NSAID (e.g. mefenamic acid) if over-the-counter options are insufficient "
+    "— consult a pharmacist first.",
     "Magnesium glycinate supplement (200–400 mg/day) may reduce cramping severity.",
     "Consider a TENS (transcutaneous electrical nerve stimulation) device for pain relief.",
     "Reduce caffeine and salty foods, which can worsen bloating.",
@@ -44,7 +45,8 @@ _MODERATE_REMEDIES = [
 
 _SEVERE_REMEDIES = [
     "Seek medical evaluation promptly — severe or sudden-onset pelvic pain warrants a clinical assessment.",
-    "If you experience fever, heavy bleeding (soaking more than 1 pad/hour), or fainting, go to an emergency department.",
+    "If you experience fever, heavy bleeding (soaking more than 1 pad/hour), or fainting, "
+    "go to an emergency department.",
     "Conditions such as endometriosis, fibroids, or ovarian cysts can cause severe symptoms and require imaging.",
     "Do not self-medicate with high-dose opioids or unverified supplements.",
 ]

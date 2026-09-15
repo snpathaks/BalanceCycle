@@ -10,7 +10,6 @@ Requires Ollama running on the host:
 import json
 import logging
 import re
-from typing import Optional
 
 import httpx
 

@@ -8,7 +8,7 @@ a clean boundary between the API contract and the persistence layer.
 from __future__ import annotations
 
 from datetime import date, datetime
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
