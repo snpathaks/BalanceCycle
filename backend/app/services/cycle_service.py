@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 from datetime import date, datetime, timedelta, timezone
-from statistics import mean, stdev
+from statistics import mean
 from typing import List, Optional, Tuple
 
 from sqlalchemy.orm import Session
