@@ -1,10 +1,14 @@
 # BalanceCycle
 
+[![CI](https://github.com/snpathaks/BalanceCycle/actions/workflows/ci.yml/badge.svg)](https://github.com/snpathaks/BalanceCycle/actions/workflows/ci.yml)
+[![CD](https://github.com/snpathaks/BalanceCycle/actions/workflows/cd.yml/badge.svg)](https://github.com/snpathaks/BalanceCycle/actions/workflows/cd.yml)
+
 **BalanceCycle** is a women's hormonal health and menstrual cycle-tracking application. It lets you log symptoms in plain, free-form text, uses a locally-run LLM (via [Ollama](https://ollama.com)) to structure and triage that text, predicts your next cycle, surfaces trends over time, and keeps a personal remedy journal — all without sending any data to third-party services.
 
 > ⚠️ **Not medical advice.** BalanceCycle is a personal tracking and triage-support tool. It is not a substitute for professional medical diagnosis or treatment. Always consult a qualified healthcare provider for medical concerns.
 
 ---
+
 
 ## ✨ Features
 

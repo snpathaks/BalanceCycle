@@ -1,0 +1,24 @@
+# BalanceCycle — Flake8 Configuration
+# Applied when running: flake8 app/ tests/
+# (CI: .github/workflows/ci.yml and cd.yml)
+
+[flake8]
+# Match the line length used in the project
+max-line-length = 120
+
+# E203: whitespace before ':' (conflicts with black-style slices)
+# W503: line break before binary operator (conflicts with black)
+# E501: line too long (handled by max-line-length above)
+extend-ignore = E203, W503
+
+# Skip generated Alembic migration files and venv/cache dirs
+exclude =
+    app/alembic/versions/,
+    venv/,
+    .venv/,
+    __pycache__/,
+    .git/,
+    *.egg-info/
+
+# Enforce per-file maximum complexity
+max-complexity = 12

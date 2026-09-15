@@ -1,0 +1,130 @@
+# ══════════════════════════════════════════════════════════════════════
+#  BalanceCycle — Continuous Integration (GitHub Actions)
+#
+#  Triggers  : Every push and pull-request (all branches)
+#  Jobs       : backend-ci  │  frontend-ci   (run in parallel)
+#
+#  backend-ci
+#    1. Lint   – flake8 (style / obvious errors)
+#    2. Test   – pytest (unit tests, no DB / HTTP required)
+#    3. Build  – docker build (validates Dockerfile integrity)
+#
+#  frontend-ci
+#    1. Lint   – oxlint  (fast JS/JSX linter already in the project)
+#    2. Build  – vite build (validates the production bundle compiles)
+#    3. Build  – docker build (validates the nginx Docker image)
+# ══════════════════════════════════════════════════════════════════════
+
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+# Cancel in-progress runs for the same ref to save CI minutes
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ────────────────────────────────────────────────────────────────────
+  #  Backend  (FastAPI · Python 3.12 · pytest)
+  # ────────────────────────────────────────────────────────────────────
+  backend-ci:
+    name: "Backend — lint · test · docker"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      # ── Lint ──────────────────────────────────────────────────────
+      - name: Lint with flake8
+        run: |
+          flake8 app/ tests/ \
+            --max-line-length=120 \
+            --extend-ignore=E203,W503 \
+            --exclude=app/alembic/versions/
+
+      # ── Tests ─────────────────────────────────────────────────────
+      - name: Run pytest
+        env:
+          # Unit tests are pure-Python — no real DB needed.
+          # A dummy URL prevents pydantic-settings from raising a validation error.
+          DATABASE_URL: "postgresql://test:test@localhost:5432/test"
+          SECRET_KEY: "ci-test-secret-key-not-used-in-real-deployment"
+          ENVIRONMENT: "test"
+        run: pytest tests/ -v --tb=short
+
+      # ── Docker build ──────────────────────────────────────────────
+      - name: Build backend Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: false   # CI only validates the build; no push to registry
+          tags: balancecycle-backend:ci-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ────────────────────────────────────────────────────────────────────
+  #  Frontend  (React · Vite · Node 22)
+  # ────────────────────────────────────────────────────────────────────
+  frontend-ci:
+    name: "Frontend — lint · build · docker"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Node dependencies
+        run: npm ci --frozen-lockfile
+
+      # ── Lint ──────────────────────────────────────────────────────
+      - name: Lint with oxlint
+        run: npm run lint
+
+      # ── Build (Vite) ──────────────────────────────────────────────
+      - name: Build production bundle
+        env:
+          # Placeholder — the real URL is injected by Render at deploy time.
+          # We set a dummy value so the build doesn't fail on missing env.
+          VITE_API_URL: "https://ci-placeholder.example.com"
+        run: npm run build
+
+      # ── Docker build ──────────────────────────────────────────────
+      - name: Build frontend Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: false   # CI only validates the build; no push to registry
+          tags: balancecycle-frontend:ci-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
