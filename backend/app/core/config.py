@@ -12,16 +12,15 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    # --- PostgreSQL ---
-    # Format: postgresql+psycopg://username:password@host:port/database_name
-    DATABASE_URL: str
+    # --- Database (defaults to local SQLite for instant setup, PostgreSQL supported) ---
+    DATABASE_URL: str = "sqlite:///./balancecycle.db"
 
     # --- Ollama (local LLM) ---
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "llama3.1"
 
     # --- JWT Auth ---
-    SECRET_KEY: str                                # 32-byte random hex, e.g. openssl rand -hex 32
+    SECRET_KEY: str = "dev-insecure-secret-key-for-balancecycle-32bytes"  # default dev key
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
 

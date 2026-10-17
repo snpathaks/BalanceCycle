@@ -52,6 +52,19 @@ app.include_router(trends.router,   prefix="/api", tags=["Trends"])
 app.include_router(remedies.router, prefix="/api", tags=["Remedies"])
 
 
+# ── Root ───────────────────────────────────────────────────────────────────
+@app.get("/", tags=["Root"])
+def root():
+    """Welcome endpoint providing status and documentation link."""
+    return {
+        "status": "online",
+        "service": "BalanceCycle API",
+        "version": "3.0.0",
+        "docs": "/docs",
+        "health": "/health",
+    }
+
+
 # ── Health ─────────────────────────────────────────────────────────────────
 @app.get("/health", tags=["Health"])
 def health_check():

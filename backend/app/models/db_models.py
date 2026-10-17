@@ -32,6 +32,10 @@ def _utcnow():
     return datetime.now(timezone.utc)
 
 
+# Compatible with both PostgreSQL (BIGINT) and SQLite (INTEGER PRIMARY KEY AUTOINCREMENT)
+IdType = BigInteger().with_variant(Integer, "sqlite")
+
+
 # ── User ───────────────────────────────────────────────────────────────────
 class User(Base):
     """
@@ -41,7 +45,7 @@ class User(Base):
 
     __tablename__ = "users"
 
-    id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
+    id = Column(IdType, primary_key=True, index=True, autoincrement=True)
     email = Column(String(256), unique=True, nullable=False, index=True)
     username = Column(String(128), unique=True, nullable=False, index=True)
     hashed_password = Column(String(256), nullable=False)
@@ -61,7 +65,7 @@ class SymptomLog(Base):
 
     __tablename__ = "symptom_logs"
 
-    id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
+    id = Column(IdType, primary_key=True, index=True, autoincrement=True)
     user_id = Column(String(128), nullable=True, index=True)
     raw_text = Column(Text, nullable=False)
     severity = Column(String(32), nullable=True)   # "mild" | "moderate" | "severe"
@@ -91,9 +95,9 @@ class ExtractedSymptom(Base):
 
     __tablename__ = "extracted_symptoms"
 
-    id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
+    id = Column(IdType, primary_key=True, index=True, autoincrement=True)
     log_id = Column(
-        BigInteger, ForeignKey("symptom_logs.id", ondelete="CASCADE"), nullable=False, index=True
+        IdType, ForeignKey("symptom_logs.id", ondelete="CASCADE"), nullable=False, index=True
     )
 
     # LLM-extracted fields
@@ -130,7 +134,7 @@ class CycleLog(Base):
 
     __tablename__ = "cycle_logs"
 
-    id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
+    id = Column(IdType, primary_key=True, index=True, autoincrement=True)
     user_id = Column(String(128), nullable=False, index=True)
     period_start = Column(DateTime(timezone=True), nullable=False, index=True)
     period_end = Column(DateTime(timezone=True), nullable=True)   # null = ongoing
@@ -157,7 +161,7 @@ class RemedyJournal(Base):
 
     __tablename__ = "remedy_journal"
 
-    id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
+    id = Column(IdType, primary_key=True, index=True, autoincrement=True)
     user_id = Column(String(128), nullable=False, index=True)
     symptom_name = Column(String(256), nullable=False, index=True)  # normalised symptom
     remedy_text = Column(Text, nullable=False)                       # e.g. "ginger tea"
