@@ -22,14 +22,14 @@ export default function TrendsPage() {
   const [barsLoading, setBarsLoading] = useState(true)
 
   useEffect(() => {
-    Promise.all([
+    Promise.allSettled([
       api.getCycleWheel(USER_ID),
       api.getTrendsBars(USER_ID, null, 8),
       api.getTrendsSummary(USER_ID),
-    ]).then(([wheel, b, s]) => {
-      setWheelData(wheel)
-      setBars(b)
-      setSummary(s)
+    ]).then(([wheelRes, barsRes, summaryRes]) => {
+      if (wheelRes.status === 'fulfilled') setWheelData(wheelRes.value)
+      if (barsRes.status === 'fulfilled') setBars(barsRes.value || [])
+      if (summaryRes.status === 'fulfilled') setSummary(summaryRes.value)
     }).catch(console.error)
       .finally(() => setBarsLoading(false))
   }, [])

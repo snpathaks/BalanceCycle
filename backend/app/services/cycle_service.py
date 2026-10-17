@@ -155,6 +155,13 @@ def predict_next_cycle(
     )
 
 
+def _to_naive_utc(dt: datetime) -> datetime:
+    """Strip or normalize timezone info so datetimes can be safely subtracted across SQLite and Postgres."""
+    if dt.tzinfo is not None:
+        return dt.astimezone(timezone.utc).replace(tzinfo=None)
+    return dt
+
+
 # ── Cycle Wheel data ───────────────────────────────────────────────────────
 
 def get_cycle_wheel_data(
@@ -173,7 +180,7 @@ def get_cycle_wheel_data(
     )
 
     if latest_cycle:
-        cycle_start: datetime = latest_cycle.period_start
+        cycle_start: datetime = _to_naive_utc(latest_cycle.period_start)
         # Use stored length or predict
         cycles_with_length = (
             db.query(CycleLog)
@@ -187,12 +194,12 @@ def get_cycle_wheel_data(
         cycle_length = round(mean(lengths)) if lengths else 28
     else:
         # No cycle data yet — use today as start with default 28 days
-        cycle_start = datetime.now(timezone.utc).replace(
+        cycle_start = _to_naive_utc(datetime.now(timezone.utc)).replace(
             hour=0, minute=0, second=0, microsecond=0
         )
         cycle_length = 28
 
-    today = datetime.now(timezone.utc)
+    today = _to_naive_utc(datetime.now(timezone.utc))
     current_day = max(1, (today - cycle_start).days + 1)
     current_day = min(current_day, cycle_length)
 
@@ -211,7 +218,8 @@ def get_cycle_wheel_data(
     # Index logs by day number
     day_data: dict[int, dict] = {}
     for log in logs_in_cycle:
-        day_num = max(1, (log.created_at - cycle_start).days + 1)
+        log_dt = _to_naive_utc(log.created_at)
+        day_num = max(1, (log_dt - cycle_start).days + 1)
         if day_num not in day_data:
             day_data[day_num] = {"scores": [], "symptoms": [], "log_ids": []}
         day_data[day_num]["log_ids"].append(log.id)
