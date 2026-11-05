@@ -9,6 +9,13 @@
 
 ---
 
+## 🎬 Demo
+
+[![Watch the Demo](https://img.youtube.com/vi/MtnnA94RQnM/maxresdefault.jpg)](https://youtu.be/MtnnA94RQnM?si=aFLrbfJdR8mZ1kan)
+
+> Click the thumbnail above to watch the full demo on YouTube.
+
+---
 
 ## ✨ Features
 
